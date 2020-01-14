@@ -1,92 +1,75 @@
-var position; //not call "location" because is a name already taken, it's the location in the web browser.
-var distance;
-var place;
-var bg;
-var circlex, circley;
-var parigix, parigiy;
-var barcax, barcay;
+let myMap;
+let canvas;
+var position;
+const mappa = new Mappa('MapboxGL', "pk.eyJ1Ijoia2Fyb3Rha2lkIiwiYSI6ImNrMm1oZzl2djBnbzYzY29mcHI1aHJ1b2oifQ.1XOszSMpdhXzJh2c6Y_45g");
 
-var barcaLat = 41.3947688;
-var barcaLon = 2.0787279;
+var b2Lat = 45.5058567;
+var b2Lon = 9.1646566;
 
-var duomoLat = 45.6328029;
-var duomoLon = 8.9005577;
+var todoLat = 45.5033794;
+var todoLon = 9.1592392;
 
-var parigiLat = 48.8588377;
-var parigiLon = 2.2770202;
+var distanceb2, distancetodo;
 
+const options = {
+  lat: b2Lat,
+  lng: b2Lon,
+  zoom: 12,
+  style: "mapbox://styles/mapbox/traffic-night-v2"
+}
 
 function preload() {
-  bg = loadImage("./assets/map.png");
-
   position = getCurrentPosition();
-  console.log(position);
 }
 
 function setup() {
+  canvas = createCanvas(windowWidth, windowHeight);
 
-  createCanvas(windowWidth, windowHeight)
-  var parigi = createButton("Paris");
-  parigi.position(windowWidth/30, windowHeight * 3 / 4);
-  parigi.mousePressed(parigidistance);
 
-  var barca = createButton("Barcelona");
-  barca.position(windowWidth/30, windowHeight * 4 / 5);
-  barca.mousePressed(barcadistance);
-}
+  myMap = mappa.tileMap(options);
+  myMap.overlay(canvas);
 
-function parigidistance() {
-  var distance = calcGeoDistance(position.latitude, position.longitude, parigiLat, parigiLon, "km");
-  var parigidistance = createElement("p", "You're " + Math.round(distance) + " km far from Paris");
-  parigidistance.position(windowWidth/11, windowHeight * 3 / 4 - 15)
-}
+  distancetodo = Math.round(calcGeoDistance(position.latitude, position.longitude, todoLat, todoLon, "km"));
+  distanceb2 = Math.round(calcGeoDistance(position.latitude, position.longitude, b2Lat, b2Lon, "km"));
 
-function barcadistance() {
-  var distance = calcGeoDistance(position.latitude, position.longitude, barcaLat, barcaLon, "km");
-  var barcadistance = createElement("p", "You're " + Math.round(distance) + " km far from Barcelona");
-  barcadistance.position(windowWidth/11, windowHeight * 4 / 5 - 15)
+
+  createElement("p", "You are " + distancetodo + " km away from Todomodo and " + distanceb2 + " km away from B2! Is it a bad or a good news?");
 }
 
 function draw() {
-  background(bg);
 
-  var posx = position.longitude;
-  var circlex = map(posx, 0, 360, 0, windowWidth);
+  clear();
 
-  var posy = position.latitude;
-  var circley = map(posy, 0, 360, 0, windowHeight) * -1;
-
-  // parigi coordinates
-  var parigix = map(parigiLon, 0, 360, 0, windowWidth);
-
-  var parigiy = map(parigiLat, 0, 360, 0, windowHeight) * -1;
-
-  // barcelona coordinates
-  var barcax = map(barcaLon, 0, 360, 0, windowWidth);
-
-  var barcay = map(barcaLat, 0, 360, 0, windowHeight*0.90) * -1;
-
-  // set the greenwhich position
-  translate(windowWidth / 2 - (windowWidth / 42.4), windowHeight / 2 - (windowHeight / 18))
-
-  // draw position
-  push()
-  fill('red')
+  var you = myMap.latLngToPixel(position.latitude, position.longitude);
+  rectMode(CENTER)
+  fill('black')
+  rect(you.x, you.y, 16, 12)
+  fill('fuchsia');
   noStroke();
-  ellipse(circlex, circley, 10);
-  pop()
+  textAlign(CENTER, CENTER)
+  textStyle(BOLD)
+  textSize(10)
+  text('YOU', you.x, you.y)
 
-  // draw paris
-  push()
-  fill('blue')
+  var b2 = myMap.latLngToPixel(b2Lat, b2Lon);
+  rectMode(CENTER)
+  fill('black')
+  rect(b2.x, b2.y, 16, 12)
+  fill('gold');
   noStroke();
-  ellipse(parigix, parigiy, 10);
-  pop()
+  textAlign(CENTER, CENTER)
+  textStyle(BOLD)
+  textSize(10)
+  text('B2', b2.x, b2.y)
 
-  // draw barcelona
-  push()
-  fill('yellow')
+  var todo = myMap.latLngToPixel(todoLat, todoLon);
+  rectMode(CENTER)
+  fill('black')
+  rect(todo.x, todo.y, 70, 20)
+  fill('aquamarine');
   noStroke();
-  ellipse(barcax, barcay, 10);
-  pop()
+  textAlign(CENTER, CENTER)
+  textStyle(BOLD)
+  textSize(10)
+  text('TODOMODO', todo.x, todo.y)
 }
